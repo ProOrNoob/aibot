@@ -63,10 +63,7 @@
 }
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<!-- Fonts self-hosted: no external request, no render-block -->
 
 <script>
   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -81,6 +78,43 @@
 </script>
 
 <style>
+  /* ===== SELF-HOSTED FONTS ===== */
+  @font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal; font-weight: 400; font-display: swap;
+    src: url('/fonts/space-grotesk-v22-latin-regular.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal; font-weight: 500; font-display: swap;
+    src: url('/fonts/space-grotesk-v22-latin-500.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal; font-weight: 600; font-display: swap;
+    src: url('/fonts/space-grotesk-v22-latin-600.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal; font-weight: 700; font-display: swap;
+    src: url('/fonts/space-grotesk-v22-latin-700.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal; font-weight: 400; font-display: swap;
+    src: url('/fonts/jetbrains-mono-v24-latin-regular.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal; font-weight: 500; font-display: swap;
+    src: url('/fonts/jetbrains-mono-v24-latin-500.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal; font-weight: 700; font-display: swap;
+    src: url('/fonts/jetbrains-mono-v24-latin-700.woff2') format('woff2');
+  }
+
   :root {
     --bg: #07080b;
     --bg-2: #0d0f14;

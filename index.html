@@ -938,10 +938,22 @@
     let W=0,H=0,nodes=[],rafId=null;
     const mouse={x:-9999,y:-9999,active:false};
 
+    let _rgb=null,_lt=null;
+    function _parseRgb(){
+      const cs=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      const h=cs.replace('#','');
+      if(h.length<6) return[255,123,154];
+      return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];
+    }
+    function rgb(){ return _rgb; }
+    function isLight(){ return _lt; }
     function resize(){
-      // fallback to window dimensions — canvas.clientWidth can be 0 on Android at init
+      // Read ALL layout/style values BEFORE any writes to avoid forced reflow
+      _rgb=_parseRgb();
+      _lt=document.body.getAttribute('data-theme')==='light';
       W=canvas.clientWidth||window.innerWidth;
       H=canvas.clientHeight||window.innerHeight;
+      // Write after all reads
       canvas.width=Math.round(W*dpr);
       canvas.height=Math.round(H*dpr);
       ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -952,13 +964,6 @@
       while(nodes.length>t) nodes.pop();
     }
     function mkNode(){ return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,r:1.2+Math.random()*1.4}; }
-    function rgb(){
-      const cs=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-      const h=cs.replace('#','');
-      if(h.length<6) return[255,123,154];
-      return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];
-    }
-    function isLight(){ return document.body.getAttribute('data-theme')==='light'; }
 
     function step(){
       if(!W||!H){ rafId=requestAnimationFrame(step); return; }

@@ -3,7 +3,65 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>AIBOT.NG</title>
+
+<!-- ===== PRIMARY SEO ===== -->
+<title>AIBOT — AI Chatbot, Agent & Automation Platform</title>
+<meta name="description" content="AIBOT is an AI-native platform for building chatbots, intelligent agents, and automation workflows. Featuring AI Chat, RAG Search, and Image Generation — low latency, high fidelity." />
+<meta name="keywords" content="AI chatbot, AI agent, automation platform, RAG search, image generation, aibot, artificial intelligence, LLM, conversational AI, bot builder" />
+<meta name="author" content="AIBOT" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://aibot.ng/" />
+
+<!-- ===== OPEN GRAPH (Facebook, LinkedIn, Zalo…) ===== -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://aibot.ng/" />
+<meta property="og:site_name" content="AIBOT" />
+<meta property="og:title" content="AIBOT — AI Chatbot, Agent & Automation Platform" />
+<meta property="og:description" content="Build the next generation of chatbots, agents, and automation projects on AIBOT. AI Chat · RAG Search · Image Gen — all in one runtime." />
+<meta property="og:image" content="https://aibot.ng/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="AIBOT — AI Platform" />
+<meta property="og:locale" content="en_US" />
+
+<!-- ===== TWITTER / X CARD ===== -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@ecko1604" />
+<meta name="twitter:creator" content="@ecko1604" />
+<meta name="twitter:title" content="AIBOT — AI Chatbot, Agent & Automation Platform" />
+<meta name="twitter:description" content="Build the next generation of chatbots, agents, and automation projects on AIBOT. AI Chat · RAG Search · Image Gen." />
+<meta name="twitter:image" content="https://aibot.ng/og-image.png" />
+
+<!-- ===== THEME & APP ===== -->
+<meta name="theme-color" content="#FF7B9A" />
+<meta name="color-scheme" content="light dark" />
+<meta name="application-name" content="AIBOT" />
+<meta name="generator" content="AIBOT Platform v1.0" />
+
+<!-- ===== STRUCTURED DATA (JSON-LD) ===== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "AIBOT",
+  "url": "https://aibot.ng",
+  "logo": "https://aibot.ng/logo.png",
+  "description": "AI-native platform for chatbots, intelligent agents, and automation workflows.",
+  "email": "gen@aibot.ng",
+  "sameAs": ["https://x.com/ecko1604"],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "gen@aibot.ng",
+    "contactType": "customer support",
+    "availableLanguage": ["English"]
+  },
+  "offers": [
+    { "@type": "Offer", "name": "AI Chat", "description": "Conversational AI with sub-40ms latency" },
+    { "@type": "Offer", "name": "RAG Search", "description": "Grounded retrieval over your knowledge base" },
+    { "@type": "Offer", "name": "Image Generation", "description": "On-demand 4K image generation" }
+  ]
+}
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -249,6 +307,57 @@
   .metric.counted .metric-bar span { width:var(--w); }
 
   /* =============================================
+     DEMO FORM
+  ============================================= */
+  .demo-section { }
+  .demo-form { max-width: 680px; margin: 0 auto; }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .form-input, .form-textarea {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--muted); }
+  .form-input:focus, .form-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 15%, transparent);
+  }
+  .form-textarea { resize: vertical; min-height: 110px; line-height: 1.5; }
+  .form-submit {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 28px;
+    background: var(--accent); color: var(--accent-ink);
+    border: none; border-radius: 100px;
+    font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 8px 24px -8px var(--accent);
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .form-submit:hover { transform: translateY(-2px); box-shadow: 0 14px 32px -8px var(--accent); }
+  .form-submit svg { width: 14px; height: 14px; }
+  .form-note { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: center; margin-top: 12px; letter-spacing: 0.04em; }
+  .form-success { display: none; text-align: center; padding: 32px; }
+  .form-success .success-icon { font-size: 40px; margin-bottom: 16px; }
+  .form-success h3 { font-size: 24px; font-weight: 600; margin: 0 0 8px; }
+  .form-success p { color: var(--muted); margin: 0; }
+
+  /* Hero CTA */
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* =============================================
      BOT HUNT MINIGAME
   ============================================= */
   .game-wrap { border:1px solid var(--line); border-radius:8px; background:var(--card); overflow:hidden; }
@@ -358,12 +467,13 @@
   <nav>
     <a class="brand" href="#top">
       <span class="brand-dot"></span>
-      <span>AIBOT.NG</span>
+      <span>AIBOT</span>
     </a>
     <div class="nav-links">
       <a href="#capabilities">Capabilities</a>
       <a href="#architecture">Architecture</a>
       <a href="#metrics">Metrics</a>
+      <a href="#demo">Demo</a>
       <a href="#game">Play</a>
       <a href="#contact" id="navX" target="_blank" rel="noopener" class="cta-nav">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.522 7.452L22 22h-6.828l-4.79-6.26L4.8 22H2.04l6.978-7.974L2 2h6.914l4.34 5.747L18.244 2Zm-1.196 18h1.5L7.05 4H5.45l11.598 16Z"/></svg>
@@ -378,6 +488,13 @@
       <span class="tag">AI · Bot · Agent · Automation</span>
       <h1 class="domain">aibot<span class="tld">.ng</span><span class="cursor"></span></h1>
       <p class="lede">A <b>short, memorable, AI-native</b> domain powering the next generation of chatbots, agents, and automation platforms. Built for teams who demand speed and fidelity above everything.</p>
+      <div class="hero-cta">
+        <a href="#demo" class="btn btn-primary">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>
+          Request a Demo
+        </a>
+        <a href="#capabilities" class="btn btn-secondary">Explore Capabilities</a>
+      </div>
     </div>
     <div class="robot-box reveal" id="robotBox">
 <span style="color:var(--muted)">$ aibot --status</span>
@@ -403,13 +520,13 @@
   <!-- TICKER -->
   <div class="ticker reveal">
     <div class="ticker-track">
-      <span>◆ <b>AIBOT.NG</b></span>
+      <span>◆ <b>AIBOT</b></span>
       <span>◆ AI · BOT · AGENT · AUTOMATION</span>
       <span>◆ BRANDABLE · MEMORABLE · SHORT</span>
       <span>◆ DM <b>@ECKO1604</b> ON X</span>
       <span>◆ 5-CHAR DOMAIN</span>
       <span>◆ NEXT-GEN <b>AI ECOSYSTEM</b></span>
-      <span>◆ <b>AIBOT.NG</b></span>
+      <span>◆ <b>AIBOT</b></span>
       <span>◆ AI · BOT · AGENT · AUTOMATION</span>
       <span>◆ BRANDABLE · MEMORABLE · SHORT</span>
       <span>◆ DM <b>@ECKO1604</b> ON X</span>
@@ -627,11 +744,59 @@
     </div>
   </section>
 
+  <!-- ============ REQUEST DEMO ============ -->
+  <section class="block" id="demo">
+    <div class="section-head reveal">
+      <div>
+        <div class="num">/04 — REQUEST DEMO</div>
+        <h2>See <em>AIBOT</em> in action.</h2>
+      </div>
+      <p>Tell us about your project and we'll set up a live walkthrough. No commitment, no sales pressure — just the product.</p>
+    </div>
+
+    <div class="demo-form reveal">
+      <form id="demoForm">
+        <div class="demo-grid">
+          <div class="form-group">
+            <label class="form-label" for="demoName">Full Name</label>
+            <input class="form-input" id="demoName" type="text" placeholder="Your name" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="demoEmail">Work Email</label>
+            <input class="form-input" id="demoEmail" type="email" placeholder="you@company.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="demoCompany">Company / Project</label>
+            <input class="form-input" id="demoCompany" type="text" placeholder="Your company or project name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="demoUsecase">Primary Use Case</label>
+            <input class="form-input" id="demoUsecase" type="text" placeholder="e.g. AI chatbot, RAG, automation…" />
+          </div>
+          <div class="form-group full">
+            <label class="form-label" for="demoMsg">Tell us more (optional)</label>
+            <textarea class="form-textarea" id="demoMsg" placeholder="Describe what you're building or what you'd like to see in the demo…"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="form-submit">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>
+          Send Demo Request
+        </button>
+        <p class="form-note">We'll reach out within 24 hours · gen@aibot.ng</p>
+      </form>
+      <div class="form-success" id="demoSuccess">
+        <div class="success-icon">✓</div>
+        <h3>Request received!</h3>
+        <p>We'll get back to you at your email within 24 hours.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ MINIGAME ============ -->
   <section class="block" id="game">
     <div class="section-head reveal">
       <div>
-        <div class="num">/04 — MINIGAME</div>
+        <div class="num">/05 — MINIGAME</div>
         <h2>Bot Hunt.<br>Can you catch them all?</h2>
       </div>
       <p>A bot randomly appears in the grid. Click it before it vanishes! Speed increases as you score. 30 seconds on the clock.</p>
@@ -670,8 +835,8 @@
   <!-- ============ CONTACT ============ -->
   <section class="block" id="contact" style="border-bottom:0; padding-bottom:40px">
     <div class="offer reveal">
-      <div class="eyebrow">/05 — Get In Touch</div>
-      <h2>Interested in <span class="at">AIBOT.NG</span>?<br>Let's talk.</h2>
+      <div class="eyebrow">/06 — Get In Touch</div>
+      <h2>Interested in <span class="at">AIBOT</span>?<br>Let's talk.</h2>
       <p>Drop a message on X or email us directly. We reply within 24 hours.</p>
       <div class="cta-row">
         <a class="btn btn-primary" id="ctaX" target="_blank" rel="noopener">
@@ -690,7 +855,7 @@
   <div class="about-wrap reveal">
     <div class="about-grid">
       <div class="about-col">
-        <div class="about-brand-title">AIBOT.NG</div>
+        <div class="about-brand-title">AIBOT</div>
         <p class="about-copy">An AI-native platform built for the next generation of chatbots, agents, and automation projects. AI Chat for daily reasoning, RAG for grounded answers, and Image Generation for teams that move fast. Private by design, tuned for your data.</p>
         <div class="about-stamp">
           <span class="about-stamp-dot"></span>
@@ -726,7 +891,7 @@
     </div>
 
     <footer>
-      <div>© 2026 AIBOT.NG · All rights reserved</div>
+      <div>© 2026 AIBOT</div>
       <div>
         <a href="mailto:gen@aibot.ng">gen@aibot.ng</a>
         <span style="margin:0 8px;opacity:0.4">·</span>
@@ -912,6 +1077,29 @@
     function close(){if(panel)panel.style.display='none';active=false;}
     window.addEventListener('message',e=>{if(!e.data||typeof e.data!=='object')return;if(e.data.type==='__activate_edit_mode')open();else if(e.data.type==='__deactivate_edit_mode')close();});
     window.parent.postMessage({type:'__edit_mode_available'},'*');
+  })();
+
+  // ===== DEMO FORM =====
+  (function demoForm() {
+    const form = document.getElementById('demoForm');
+    const success = document.getElementById('demoSuccess');
+    if (!form) return;
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const name    = document.getElementById('demoName').value.trim();
+      const email   = document.getElementById('demoEmail').value.trim();
+      const company = document.getElementById('demoCompany').value.trim();
+      const usecase = document.getElementById('demoUsecase').value.trim();
+      const msg     = document.getElementById('demoMsg').value.trim();
+      const subject = encodeURIComponent(`Demo Request — ${name}${company ? ' · ' + company : ''}`);
+      const body = encodeURIComponent(
+        `Name: ${name}\nEmail: ${email}\nCompany: ${company || '—'}\nUse Case: ${usecase || '—'}\n\nMessage:\n${msg || '—'}`
+      );
+      window.location.href = `mailto:gen@aibot.ng?subject=${subject}&body=${body}`;
+      // Show success state
+      form.style.display = 'none';
+      success.style.display = 'block';
+    });
   })();
 
   // ===== BOT HUNT MINIGAME =====

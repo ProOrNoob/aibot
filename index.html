@@ -38,6 +38,10 @@
 <meta name="application-name" content="AIBOT" />
 <meta name="generator" content="AIBOT Platform v1.0" />
 
+<!-- ===== PRELOAD CRITICAL FONTS (for LCP h1.domain) ===== -->
+<link rel="preload" href="/fonts/space-grotesk-v22-latin-700.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/jetbrains-mono-v24-latin-500.woff2" as="font" type="font/woff2" crossorigin />
+
 <!-- ===== STRUCTURED DATA (JSON-LD) ===== -->
 <script type="application/ld+json">
 {
@@ -78,26 +82,33 @@
 </script>
 
 <style>
-  /* ===== SELF-HOSTED FONTS ===== */
+  /* ===== SELF-HOSTED FONTS =====
+     Critical (LCP): Space Grotesk 700 + JetBrains Mono 500 — preloaded in <head>.
+     size-adjust matches the fallback's x-height/advance to the web font, eliminating
+     layout shift when 'swap' occurs and letting LCP commit on the very first paint. */
   @font-face {
     font-family: 'Space Grotesk';
     font-style: normal; font-weight: 400; font-display: swap;
     src: url('/fonts/space-grotesk-v22-latin-regular.woff2') format('woff2');
+    size-adjust: 100%;
   }
   @font-face {
     font-family: 'Space Grotesk';
     font-style: normal; font-weight: 500; font-display: swap;
     src: url('/fonts/space-grotesk-v22-latin-500.woff2') format('woff2');
+    size-adjust: 100%;
   }
   @font-face {
     font-family: 'Space Grotesk';
     font-style: normal; font-weight: 600; font-display: swap;
     src: url('/fonts/space-grotesk-v22-latin-600.woff2') format('woff2');
+    size-adjust: 100%;
   }
   @font-face {
     font-family: 'Space Grotesk';
     font-style: normal; font-weight: 700; font-display: swap;
     src: url('/fonts/space-grotesk-v22-latin-700.woff2') format('woff2');
+    size-adjust: 100%;
   }
   @font-face {
     font-family: 'JetBrains Mono';
@@ -115,6 +126,17 @@
     src: url('/fonts/jetbrains-mono-v24-latin-700.woff2') format('woff2');
   }
 
+  /* Fallback metrics tuned so the system font occupies the SAME box as Space Grotesk.
+     Hero h1 renders instantly with the fallback → font swaps with zero CLS. */
+  @font-face {
+    font-family: 'Space Grotesk Fallback';
+    src: local('Arial');
+    size-adjust: 99%;
+    ascent-override: 95%;
+    descent-override: 25%;
+    line-gap-override: 0%;
+  }
+
   :root {
     --bg: #07080b;
     --bg-2: #0d0f14;
@@ -125,7 +147,7 @@
     --accent: #FF7B9A;
     --accent-ink: #001b0c;
     --mono: 'JetBrains Mono', ui-monospace, monospace;
-    --sans: 'Space Grotesk', system-ui, sans-serif;
+    --sans: 'Space Grotesk', 'Space Grotesk Fallback', system-ui, sans-serif;
     --ease: cubic-bezier(0.2,0.7,0.15,1);
   }
   [data-theme="light"] {
@@ -818,7 +840,7 @@
           <svg viewBox="0 0 16 16" fill="none"><path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>
           Send Demo Request
         </button>
-        <p class="form-note">We'll reach out within 24 hours · gen@aibot.ng</p>
+        <p class="form-note">We'll reach out within 24 hours · <!--email_off-->gen@aibot.ng<!--/email_off--></p>
       </form>
       <div class="form-success" id="demoSuccess">
         <div class="success-icon">✓</div>
@@ -881,7 +903,7 @@
         </a>
         <a class="btn btn-secondary" href="mailto:gen@aibot.ng">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-          gen@aibot.ng
+          <!--email_off-->gen@aibot.ng<!--/email_off-->
         </a>
       </div>
     </div>
@@ -919,7 +941,7 @@
       <div class="about-col">
         <div class="about-k">CONTACT</div>
         <ul class="about-list">
-          <li><a href="mailto:gen@aibot.ng">gen@aibot.ng</a></li>
+          <li><a href="mailto:gen@aibot.ng"><!--email_off-->gen@aibot.ng<!--/email_off--></a></li>
           <li><a href="https://x.com/ecko1604" target="_blank" rel="noopener">@ecko1604 on X</a></li>
           <li><span>Support · Mon–Fri</span></li>
         </ul>
@@ -929,7 +951,7 @@
     <footer>
       <div>© 2026 AIBOT</div>
       <div>
-        <a href="mailto:gen@aibot.ng">gen@aibot.ng</a>
+        <a href="mailto:gen@aibot.ng"><!--email_off-->gen@aibot.ng<!--/email_off--></a>
         <span style="margin:0 8px;opacity:0.4">·</span>
         Last updated: <span id="lastUpdate">—</span>
       </div>
@@ -1042,7 +1064,11 @@
       document.hidden ? stopLoop() : startLoop();
     });
 
-    window.addEventListener('resize',()=>{ resize(); },{ passive:true });
+    let resizeRaf=0;
+    window.addEventListener('resize',()=>{
+      if(resizeRaf) return;
+      resizeRaf=requestAnimationFrame(()=>{ resizeRaf=0; resize(); });
+    },{ passive:true });
     window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;mouse.active=true;},{passive:true});
     window.addEventListener('mouseleave',()=>{mouse.active=false;});
 
@@ -1052,8 +1078,16 @@
     },{passive:true});
     window.addEventListener('touchend',()=>{mouse.active=false;},{passive:true});
 
-    resize();
-    startLoop();
+    // Defer canvas init until AFTER the LCP element has painted.
+    // Reasons: (1) the canvas isn't visible content — it's background decoration,
+    // (2) initializing it on the critical path competes with font/LCP rendering and
+    // triggers a forced reflow (clientWidth read + canvas.width write).
+    function boot(){ resize(); startLoop(); }
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(boot, { timeout: 800 });
+    } else {
+      setTimeout(boot, 200);
+    }
   })();
 
   // ===== Scroll reveal + metric count-up =====

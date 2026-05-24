@@ -766,56 +766,88 @@
   // ===== Network BG =====
   (function netBG() {
     const canvas=document.getElementById('netCanvas'), ctx=canvas.getContext('2d');
-    let W=0,H=0,dpr=Math.min(window.devicePixelRatio||1,2),nodes=[];
+    const isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||window.innerWidth<768;
+    const dpr=Math.min(window.devicePixelRatio||1, isMobile?1.5:2);
+    let W=0,H=0,nodes=[],rafId=null;
     const mouse={x:-9999,y:-9999,active:false};
+
     function resize(){
-      W=canvas.clientWidth; H=canvas.clientHeight;
-      canvas.width=W*dpr; canvas.height=H*dpr;
+      // fallback to window dimensions — canvas.clientWidth can be 0 on Android at init
+      W=canvas.clientWidth||window.innerWidth;
+      H=canvas.clientHeight||window.innerHeight;
+      canvas.width=Math.round(W*dpr);
+      canvas.height=Math.round(H*dpr);
       ctx.setTransform(dpr,0,0,dpr,0,0);
-      const t=Math.max(40,Math.min(110,Math.floor((W*H)/18000)));
+      const maxNodes=isMobile?30:110;
+      const minNodes=isMobile?16:40;
+      const t=Math.max(minNodes,Math.min(maxNodes,Math.floor((W*H)/18000)));
       while(nodes.length<t) nodes.push(mkNode());
       while(nodes.length>t) nodes.pop();
     }
-    function mkNode(){ return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.35,vy:(Math.random()-0.5)*0.35,r:1.2+Math.random()*1.6}; }
+    function mkNode(){ return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,r:1.2+Math.random()*1.4}; }
     function rgb(){
       const cs=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
       const h=cs.replace('#','');
       if(h.length<6) return[255,123,154];
       return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];
     }
-    function light(){ return document.body.getAttribute('data-theme')==='light'; }
+    function isLight(){ return document.body.getAttribute('data-theme')==='light'; }
+
     function step(){
+      if(!W||!H){ rafId=requestAnimationFrame(step); return; }
       ctx.clearRect(0,0,W,H);
-      const [ar,ag,ab]=rgb(), lt=light(), lb=lt?[10,12,16]:[255,255,255];
+      const [ar,ag,ab]=rgb(), lt=isLight(), lb=lt?[10,12,16]:[255,255,255];
+      const MAX=isMobile?100:140;
       for(const n of nodes){
         n.x+=n.vx; n.y+=n.vy;
-        if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1;
-        if(mouse.active){const dx=mouse.x-n.x,dy=mouse.y-n.y,d2=dx*dx+dy*dy;if(d2<22500){n.vx+=dx*0.0008;n.vy+=dy*0.0008;}}
-        n.vx=Math.max(-0.7,Math.min(0.7,n.vx*0.995)); n.vy=Math.max(-0.7,Math.min(0.7,n.vy*0.995));
+        if(n.x<0||n.x>W)n.vx*=-1;
+        if(n.y<0||n.y>H)n.vy*=-1;
+        if(mouse.active){
+          const dx=mouse.x-n.x,dy=mouse.y-n.y,d2=dx*dx+dy*dy;
+          if(d2<16000){n.vx+=dx*0.0006;n.vy+=dy*0.0006;}
+        }
+        n.vx=Math.max(-0.6,Math.min(0.6,n.vx*0.995));
+        n.vy=Math.max(-0.6,Math.min(0.6,n.vy*0.995));
       }
-      const MAX=140;
       for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
         const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
         if(d<MAX){
-          const al=(1-d/MAX)*(lt?0.35:0.45);
+          const al=(1-d/MAX)*(lt?0.32:0.42);
           const mid=((a.x+b.x)/2-mouse.x)**2+((a.y+b.y)/2-mouse.y)**2;
-          const near=mouse.active&&mid<14400;
-          ctx.strokeStyle=near?`rgba(${ar},${ag},${ab},${al+0.15})`:`rgba(${lb[0]},${lb[1]},${lb[2]},${al*0.55})`;
-          ctx.lineWidth=near?0.9:0.6;
+          const near=mouse.active&&mid<12000;
+          ctx.strokeStyle=near?`rgba(${ar},${ag},${ab},${al+0.15})`:`rgba(${lb[0]},${lb[1]},${lb[2]},${al*0.5})`;
+          ctx.lineWidth=near?0.9:0.55;
           ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
         }
       }
       for(const n of nodes){
         const dm=mouse.active?Math.hypot(n.x-mouse.x,n.y-mouse.y):9999;
-        ctx.fillStyle=dm<120?`rgba(${ar},${ag},${ab},0.95)`:`rgba(${ar},${ag},${ab},0.55)`;
+        ctx.fillStyle=dm<100?`rgba(${ar},${ag},${ab},0.95)`:`rgba(${ar},${ag},${ab},0.52)`;
         ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();
       }
-      requestAnimationFrame(step);
+      rafId=requestAnimationFrame(step);
     }
-    window.addEventListener('resize',resize);
-    window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;mouse.active=true;});
+
+    function startLoop(){ if(!rafId){ rafId=requestAnimationFrame(step); } }
+    function stopLoop(){ if(rafId){ cancelAnimationFrame(rafId); rafId=null; } }
+
+    // Pause when tab hidden — prevents freeze on Android when switching apps
+    document.addEventListener('visibilitychange',()=>{
+      document.hidden ? stopLoop() : startLoop();
+    });
+
+    window.addEventListener('resize',()=>{ resize(); },{ passive:true });
+    window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;mouse.active=true;},{passive:true});
     window.addEventListener('mouseleave',()=>{mouse.active=false;});
-    resize(); step();
+
+    // Touch support for Android
+    window.addEventListener('touchmove',e=>{
+      if(e.touches[0]){mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY;mouse.active=true;}
+    },{passive:true});
+    window.addEventListener('touchend',()=>{mouse.active=false;},{passive:true});
+
+    resize();
+    startLoop();
   })();
 
   // ===== Scroll reveal + metric count-up =====

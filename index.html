@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AIBOT.NG</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script>
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "theme": "light",
+    "accent": "#FF7B9A",
+    "bg": "minimal",
+    "showRobot": true
+  }/*EDITMODE-END*/;
+</script>
+<script>
+  const LINKS = { x: "https://x.com/ecko1604" };
+</script>
+
+<style>
+  :root {
+    --bg: #07080b;
+    --bg-2: #0d0f14;
+    --fg: #f0f3f5;
+    --muted: #8a93a0;
+    --line: rgba(255,255,255,0.08);
+    --card: rgba(255,255,255,0.03);
+    --accent: #FF7B9A;
+    --accent-ink: #001b0c;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Space Grotesk', system-ui, sans-serif;
+    --ease: cubic-bezier(0.2,0.7,0.15,1);
+  }
+  [data-theme="light"] {
+    --bg: #f4f5f0;
+    --bg-2: #ffffff;
+    --fg: #0a0c10;
+    --muted: #5b6470;
+    --line: rgba(0,0,0,0.10);
+    --card: rgba(0,0,0,0.025);
+    --accent-ink: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* --- BG LAYER --- */
+  .bg-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  #netCanvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.55; }
+  .bg-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--line) 1px,transparent 1px), linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at 50% 30%,black 35%,transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 30%,black 35%,transparent 75%);
+  }
+  .bg-glow { position: absolute; inset: 0; }
+  .bg-glow::before, .bg-glow::after {
+    content:""; position:absolute; width:60vw; height:60vw; border-radius:50%; filter:blur(120px); opacity:0.35;
+  }
+  .bg-glow::before { top:-20vw; left:-15vw; background:var(--accent); }
+  .bg-glow::after  { bottom:-25vw; right:-10vw; background:oklch(0.65 0.18 270); opacity:0.25; }
+
+  main { position:relative; z-index:1; max-width:1320px; margin:0 auto; padding:28px 40px 80px; }
+
+  /* --- NAV --- */
+  nav {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 0 24px; gap:24px; flex-wrap:wrap;
+  }
+  .brand {
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--mono); font-size:13px; letter-spacing:0.04em;
+    text-decoration:none; color:var(--fg);
+  }
+  .brand-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--accent); box-shadow:0 0 12px var(--accent);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.55;transform:scale(0.85)} }
+  .nav-links { display:flex; gap:4px; font-family:var(--mono); font-size:12px; align-items:center; flex-wrap:wrap; }
+  .nav-links a {
+    color:var(--muted); text-decoration:none; padding:8px 14px;
+    border-radius:100px; transition:all 0.2s; border:1px solid transparent;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .nav-links a:hover { color:var(--fg); background:var(--card); border-color:var(--line); }
+  .nav-links a.cta-nav { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .nav-links a.cta-nav:hover { background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .nav-links svg { width:12px; height:12px; }
+
+  /* --- HERO --- */
+  .hero {
+    display:grid; grid-template-columns:1.4fr 1fr; gap:64px;
+    align-items:end; padding:64px 0 80px; border-bottom:1px solid var(--line);
+  }
+  .tag {
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--accent); padding:6px 12px; border:1px solid var(--accent);
+    border-radius:100px; margin-bottom:28px;
+  }
+  .tag::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  h1.domain {
+    font-family:var(--sans); font-weight:700; font-size:clamp(72px,13vw,200px);
+    line-height:0.88; letter-spacing:-0.04em; margin:0 0 24px;
+    display:flex; align-items:baseline; flex-wrap:wrap;
+  }
+  h1.domain .tld {
+    color:var(--accent); font-family:var(--mono); font-weight:500;
+    font-size:0.42em; letter-spacing:-0.02em; margin-left:0.04em; transform:translateY(-0.15em);
+  }
+  h1.domain .cursor {
+    display:inline-block; width:0.08em; height:0.85em; background:var(--accent);
+    margin-left:0.04em; animation:blink 1.05s steps(2) infinite; transform:translateY(0.05em);
+  }
+  @keyframes blink { 50%{opacity:0} }
+  .lede { font-size:20px; line-height:1.45; color:var(--muted); max-width:540px; margin:0 0 36px; text-wrap:pretty; }
+  .lede b { color:var(--fg); font-weight:500; }
+
+  /* --- ROBOT --- */
+  .robot-box {
+    font-family:var(--mono); font-size:11px; line-height:1.25; color:var(--accent);
+    white-space:pre; background:var(--card); border:1px solid var(--line); border-radius:6px;
+    padding:18px 20px; box-shadow:0 0 80px -20px var(--accent); position:relative;
+  }
+  .robot-box::before { content:"● ● ●"; position:absolute; top:8px; left:12px; font-size:9px; color:var(--muted); letter-spacing:6px; }
+  .robot-box .terminal-head { color:var(--muted); font-size:10px; letter-spacing:0.08em; margin:18px 0 12px; border-bottom:1px dashed var(--line); padding-bottom:8px; }
+  .robot-box .blink { animation:blink 1s steps(2) infinite; }
+
+  /* --- SECTIONS --- */
+  section.block { padding:80px 0; border-bottom:1px solid var(--line); scroll-margin-top:80px; }
+  .section-head { display:flex; justify-content:space-between; align-items:end; gap:40px; margin-bottom:48px; }
+  .section-head h2 { font-size:clamp(36px,4.5vw,56px); line-height:1; letter-spacing:-0.025em; font-weight:600; margin:0; max-width:720px; }
+  .section-head h2 em { color:var(--accent); font-style:italic; }
+  .section-head .num { font-family:var(--mono); font-size:11px; letter-spacing:0.16em; color:var(--muted); text-transform:uppercase; margin-bottom:12px; }
+  .section-head p { color:var(--muted); max-width:380px; margin:0; line-height:1.5; }
+
+  /* --- SCROLL REVEAL --- */
+  .reveal { opacity:0; transform:translateY(32px); transition:opacity 0.9s var(--ease),transform 0.9s var(--ease); }
+  .reveal.in { opacity:1; transform:none; }
+  .reveal-stagger > * { opacity:0; transform:translateY(24px); transition:opacity 0.7s var(--ease),transform 0.7s var(--ease); }
+  .reveal-stagger.in > * { opacity:1; transform:none; }
+  .reveal-stagger.in > *:nth-child(1){ transition-delay:0.05s; }
+  .reveal-stagger.in > *:nth-child(2){ transition-delay:0.12s; }
+  .reveal-stagger.in > *:nth-child(3){ transition-delay:0.19s; }
+  .reveal-stagger.in > *:nth-child(4){ transition-delay:0.26s; }
+
+  /* --- TICKER --- */
+  .ticker { border-top:1px solid var(--line); border-bottom:1px solid var(--line); overflow:hidden; padding:18px 0; font-family:var(--mono); font-size:13px; color:var(--muted); white-space:nowrap; }
+  .ticker-track { display:inline-flex; gap:48px; padding-left:48px; animation:scroll 40s linear infinite; }
+  .ticker-track span b { color:var(--accent); font-weight:500; }
+  @keyframes scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* =============================================
+     CAPABILITY CARDS
+  ============================================= */
+  .cap-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .cap-card {
+    position:relative; padding:24px; border:1px solid var(--line);
+    background:var(--card); border-radius:8px;
+    display:flex; flex-direction:column; gap:18px; min-height:320px;
+    transition:border-color 0.3s var(--ease),transform 0.3s var(--ease);
+    overflow:hidden; cursor:default;
+  }
+  .cap-card::after {
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%), color-mix(in oklab,var(--accent) 12%,transparent),transparent 60%);
+    opacity:0; pointer-events:none; transition:opacity 0.3s var(--ease);
+  }
+  .cap-card:hover { border-color:var(--accent); transform:translateY(-4px); }
+  .cap-card:hover::after { opacity:1; }
+  .cap-card-head { display:flex; justify-content:space-between; align-items:center; }
+  .cap-card-id { font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+  .cap-card-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  .cap-card-graphic {
+    height:90px; color:var(--accent);
+    border:1px solid var(--line); border-radius:4px;
+    background:color-mix(in oklab,var(--bg) 60%,transparent);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .cap-card-graphic svg { width:100%; height:100%; }
+  .cap-card-title { font-size:26px; font-weight:600; letter-spacing:-0.02em; margin:0; }
+  .cap-card-body { font-size:14px; color:var(--muted); margin:0; flex-grow:1; line-height:1.6; }
+  .cap-card-foot { display:flex; justify-content:space-between; align-items:baseline; border-top:1px solid var(--line); padding-top:14px; }
+  .cap-card-foot .cap-stat { color:var(--accent); font-family:var(--mono); font-size:20px; }
+  .cap-card-foot .cap-key { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+
+  /* SVG graphic animations */
+  .gr-nodes circle { animation:nodePulse 2.4s ease-in-out infinite; }
+  .gr-nodes circle:nth-child(2){ animation-delay:0.3s; }
+  .gr-nodes circle:nth-child(3){ animation-delay:0.6s; }
+  .gr-nodes circle:nth-child(4){ animation-delay:0.9s; }
+  .gr-nodes circle:nth-child(5){ animation-delay:1.2s; }
+  @keyframes nodePulse { 50%{opacity:0.35} }
+  .gr-scan line { animation:scanMove 3s ease-in-out infinite; }
+  @keyframes scanMove { 0%,100%{transform:translateY(-18px);opacity:0.9} 50%{transform:translateY(18px);opacity:1} }
+  .gr-cursor { animation:blink 1s steps(2) infinite; }
+
+  /* =============================================
+     ARCHITECTURE
+  ============================================= */
+  .arch-stage { display:grid; grid-template-columns:1fr 380px; gap:60px; align-items:center; padding:20px 0; }
+  .arch-col { display:flex; flex-direction:column; gap:2px; }
+  .arch-row {
+    display:grid; grid-template-columns:160px 1fr; gap:20px; align-items:baseline;
+    padding:22px 0; border-bottom:1px solid var(--line);
+    transition:padding-left 0.3s var(--ease); position:relative;
+  }
+  .arch-row::before { content:""; position:absolute; left:0; top:50%; width:0; height:1px; background:var(--accent); transition:width 0.3s var(--ease); }
+  .arch-row:hover { padding-left:16px; }
+  .arch-row:hover::before { width:10px; }
+  .arch-k { font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .arch-v { font-size:20px; letter-spacing:-0.01em; color:var(--fg); }
+  .arch-diagram { color:var(--accent); opacity:0.85; }
+  .arch-orbit { transform-origin:190px 190px; animation:orbit 16s linear infinite; }
+  .arch-orbit-2 { animation-duration:11s; animation-direction:reverse; }
+  .arch-orbit-3 { animation-duration:7s; }
+  @keyframes orbit { to{transform:rotate(360deg)} }
+
+  /* =============================================
+     METRICS
+  ============================================= */
+  .metric-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+  .metric {
+    padding:28px 24px; border:1px solid var(--line); border-radius:8px;
+    background:var(--card); display:flex; flex-direction:column; gap:12px;
+    transition:border-color 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .metric:hover { border-color:var(--accent); transform:translateY(-3px); }
+  .metric-num { font-size:56px; font-weight:400; letter-spacing:-0.04em; line-height:1; font-variant-numeric:tabular-nums; }
+  .metric-num .unit { color:var(--accent); font-size:24px; vertical-align:top; margin-left:4px; }
+  .metric-label { font-family:var(--mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+  .metric-bar { height:2px; background:var(--line); margin-top:4px; overflow:hidden; border-radius:1px; }
+  .metric-bar span { display:block; height:100%; width:0; background:var(--accent); box-shadow:0 0 8px var(--accent); transition:width 1.4s var(--ease); }
+  .metric.counted .metric-bar span { width:var(--w); }
+
+  /* =============================================
+     BOT HUNT MINIGAME
+  ============================================= */
+  .game-wrap { border:1px solid var(--line); border-radius:8px; background:var(--card); overflow:hidden; }
+  .game-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:12px; color:var(--muted); flex-wrap:wrap; gap:12px; }
+  .game-header .game-title { letter-spacing:0.12em; text-transform:uppercase; color:var(--fg); font-weight:500; }
+  .game-stats { display:flex; gap:24px; align-items:center; }
+  .game-stat { display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .game-stat .stat-label { font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .game-stat .stat-val { font-size:22px; font-weight:700; color:var(--accent); line-height:1; min-width:3ch; text-align:center; }
+  #timerVal { color:var(--fg); }
+  #timerVal.urgent { color:var(--accent); animation:pulse 0.5s infinite; }
+  .game-board-wrap { position:relative; padding:24px; }
+  #gameBoard { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; aspect-ratio:3/1; max-height:280px; }
+  .cell { border:1px solid var(--line); border-radius:6px; background:var(--bg); cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; color:var(--muted); transition:background 0.1s,border-color 0.1s,transform 0.1s; user-select:none; position:relative; overflow:hidden; }
+  .cell.bot-active { background:color-mix(in oklab,var(--accent) 15%,var(--bg)); border-color:var(--accent); color:var(--accent); box-shadow:0 0 16px -4px var(--accent); animation:botPulse 0.7s ease infinite alternate; }
+  @keyframes botPulse { from{box-shadow:0 0 8px -4px var(--accent)} to{box-shadow:0 0 22px -2px var(--accent)} }
+  .cell.bot-active::after { content:"◉"; font-size:20px; }
+  .cell.hit { background:color-mix(in oklab,var(--accent) 40%,var(--bg)); transform:scale(0.88); transition:transform 0.1s,background 0.1s; }
+  .cell.miss { background:color-mix(in oklab,#ff4444 20%,var(--bg)); border-color:#ff4444; transition:background 0.15s,border-color 0.15s; }
+  .game-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:color-mix(in oklab,var(--bg) 85%,transparent); backdrop-filter:blur(4px); gap:16px; z-index:10; }
+  .game-overlay h3 { font-size:clamp(22px,3vw,32px); font-weight:600; letter-spacing:-0.02em; margin:0; text-align:center; }
+  .game-overlay p { color:var(--muted); font-family:var(--mono); font-size:13px; margin:0; text-align:center; line-height:1.6; }
+  .game-overlay .score-big { font-family:var(--mono); font-size:clamp(48px,8vw,72px); font-weight:700; color:var(--accent); line-height:1; }
+  .game-overlay .score-hi { font-family:var(--mono); font-size:13px; color:var(--muted); }
+  .game-overlay .score-hi b { color:var(--fg); }
+  .btn-game { display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border-radius:100px; font-family:var(--mono); font-size:13px; font-weight:500; letter-spacing:0.04em; cursor:pointer; border:1px solid transparent; transition:transform 0.15s,background 0.15s,box-shadow 0.2s; background:var(--accent); color:var(--accent-ink); box-shadow:0 8px 24px -8px var(--accent); }
+  .btn-game:hover { transform:translateY(-2px); box-shadow:0 14px 32px -8px var(--accent); }
+  .game-footer { padding:12px 24px 16px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; font-family:var(--mono); font-size:11px; color:var(--muted); flex-wrap:wrap; gap:8px; }
+  .diff-btns { display:flex; gap:4px; }
+  .diff-btn { border:1px solid var(--line); background:transparent; color:var(--muted); font-family:var(--mono); font-size:10px; padding:4px 10px; border-radius:100px; cursor:pointer; transition:all 0.15s; letter-spacing:0.06em; text-transform:uppercase; }
+  .diff-btn:hover { color:var(--fg); border-color:var(--fg); }
+  .diff-btn.active { color:var(--accent); border-color:var(--accent); }
+
+  /* --- OFFER / CONTACT --- */
+  .offer { text-align:center; padding:100px 40px; border:1px solid var(--line); border-radius:8px; background:radial-gradient(ellipse at 50% 0%,color-mix(in oklab,var(--accent) 14%,transparent),transparent 60%),var(--card); position:relative; overflow:hidden; }
+  .offer::before { content:""; position:absolute; inset:0; background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px); background-size:32px 32px; mask-image:radial-gradient(ellipse at 50% 50%,black 0%,transparent 70%); -webkit-mask-image:radial-gradient(ellipse at 50% 50%,black 0%,transparent 70%); pointer-events:none; }
+  .offer > * { position:relative; }
+  .offer .eyebrow { font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:20px; }
+  .offer h2 { font-size:clamp(40px,5.5vw,76px); line-height:0.95; letter-spacing:-0.03em; font-weight:600; margin:0 0 16px; }
+  .offer h2 .at { color:var(--accent); font-family:var(--mono); font-weight:500; }
+  .offer p { color:var(--muted); max-width:560px; margin:0 auto 40px; font-size:18px; line-height:1.5; }
+  .cta-row { display:inline-flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .btn { display:inline-flex; align-items:center; gap:10px; padding:16px 26px; border-radius:100px; font-family:var(--mono); font-size:13px; font-weight:500; letter-spacing:0.04em; text-decoration:none; transition:transform 0.15s,background 0.15s,box-shadow 0.2s; cursor:pointer; border:1px solid transparent; }
+  .btn-primary { background:var(--accent); color:var(--accent-ink); box-shadow:0 8px 24px -8px var(--accent); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 14px 32px -8px var(--accent); }
+  .btn-secondary { background:transparent; color:var(--fg); border-color:var(--line); }
+  .btn-secondary:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-2px); }
+  .btn svg { width:14px; height:14px; }
+
+  /* --- ABOUT FOOTER GRID --- */
+  .about-wrap { padding:60px 0 0; border-top:1px solid var(--line); margin-top:40px; }
+  .about-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; padding-bottom:40px; border-bottom:1px solid var(--line); }
+  .about-col { min-width:0; }
+  .about-brand-title { font-family:var(--mono); font-size:14px; letter-spacing:0.06em; margin:0 0 12px; }
+  .about-copy { font-size:14px; color:var(--muted); line-height:1.6; margin:0 0 20px; max-width:360px; }
+  .about-stamp { display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); padding:5px 10px; border-radius:100px; }
+  .about-stamp-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); }
+  .about-k { font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--line); }
+  .about-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
+  .about-list li a, .about-list li span { font-size:14px; color:var(--muted); text-decoration:none; transition:color 0.2s,padding-left 0.2s; display:block; }
+  .about-list li a:hover { color:var(--accent); padding-left:6px; }
+
+  /* --- FOOTER BAR --- */
+  footer { padding:28px 0 0; display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:0.04em; flex-wrap:wrap; gap:12px; }
+  footer a { color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  footer a:hover { color:var(--accent); }
+
+  /* --- RESPONSIVE --- */
+  @media (max-width:1100px) {
+    .cap-grid { grid-template-columns:repeat(2,1fr); }
+    .metric-grid { grid-template-columns:repeat(2,1fr); }
+    .arch-stage { grid-template-columns:1fr; gap:40px; }
+    .arch-diagram { max-width:360px; margin:0 auto; }
+    .about-grid { grid-template-columns:1fr 1fr; gap:32px; }
+  }
+  @media (max-width:960px) {
+    main { padding:20px 22px 60px; }
+    .hero { grid-template-columns:1fr; gap:40px; padding:32px 0 56px; }
+    .robot-box { font-size:9px; }
+    #gameBoard { grid-template-columns:repeat(4,1fr); aspect-ratio:auto; }
+    .section-head { flex-direction:column; align-items:flex-start; gap:16px; }
+    .offer { padding:60px 22px; }
+  }
+  @media (max-width:720px) {
+    .cap-grid { grid-template-columns:1fr; }
+    .metric-grid { grid-template-columns:1fr 1fr; }
+    .about-grid { grid-template-columns:1fr; gap:28px; }
+    .nav-links a:not(.cta-nav) { display:none; }
+    .nav-links a.cta-nav { display:inline-flex; }
+  }
+  @media (max-width:540px) {
+    #gameBoard { grid-template-columns:repeat(3,1fr); }
+    .metric-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div class="bg-layer">
+  <canvas id="netCanvas"></canvas>
+  <div class="bg-grid" id="bgGrid"></div>
+  <div class="bg-glow" id="bgGlow"></div>
+</div>
+
+<main>
+
+  <nav>
+    <a class="brand" href="#top">
+      <span class="brand-dot"></span>
+      <span>AIBOT.NG</span>
+    </a>
+    <div class="nav-links">
+      <a href="#capabilities">Capabilities</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#metrics">Metrics</a>
+      <a href="#game">Play</a>
+      <a href="#contact" id="navX" target="_blank" rel="noopener" class="cta-nav">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.522 7.452L22 22h-6.828l-4.79-6.26L4.8 22H2.04l6.978-7.974L2 2h6.914l4.34 5.747L18.244 2Zm-1.196 18h1.5L7.05 4H5.45l11.598 16Z"/></svg>
+        @ecko1604
+      </a>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="top">
+    <div class="reveal">
+      <span class="tag">AI · Bot · Agent · Automation</span>
+      <h1 class="domain">aibot<span class="tld">.ng</span><span class="cursor"></span></h1>
+      <p class="lede">A <b>short, memorable, AI-native</b> domain powering the next generation of chatbots, agents, and automation platforms. Built for teams who demand speed and fidelity above everything.</p>
+    </div>
+    <div class="robot-box reveal" id="robotBox">
+<span style="color:var(--muted)">$ aibot --status</span>
+
+      ╔══════════╗
+      ║  ◉    ◉  ║
+      ║   ────   ║
+      ╚═══╦══╦═══╝
+       ╔══╩══╩══╗
+       ║ AIBOT  ║
+       ║  .NG   ║
+       ╚════════╝
+        ║║    ║║
+        ╨╨    ╨╨
+
+<div class="terminal-head">// SYSTEM LOG</div><span style="color:var(--muted)">&gt;</span> domain.parse("aibot.ng")
+<span style="color:var(--muted)">&gt;</span> memorability:  <span style="color:var(--accent)">98%</span>
+<span style="color:var(--muted)">&gt;</span> brandability:  <span style="color:var(--accent)">97%</span>
+<span style="color:var(--muted)">&gt;</span> ai_relevance:  <span style="color:var(--accent)">100%</span>
+<span style="color:var(--muted)">&gt;</span> online:        <span style="color:var(--accent)">true<span class="blink">_</span></span></div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker reveal">
+    <div class="ticker-track">
+      <span>◆ <b>AIBOT.NG</b></span>
+      <span>◆ AI · BOT · AGENT · AUTOMATION</span>
+      <span>◆ BRANDABLE · MEMORABLE · SHORT</span>
+      <span>◆ DM <b>@ECKO1604</b> ON X</span>
+      <span>◆ 5-CHAR DOMAIN</span>
+      <span>◆ NEXT-GEN <b>AI ECOSYSTEM</b></span>
+      <span>◆ <b>AIBOT.NG</b></span>
+      <span>◆ AI · BOT · AGENT · AUTOMATION</span>
+      <span>◆ BRANDABLE · MEMORABLE · SHORT</span>
+      <span>◆ DM <b>@ECKO1604</b> ON X</span>
+      <span>◆ 5-CHAR DOMAIN</span>
+      <span>◆ NEXT-GEN <b>AI ECOSYSTEM</b></span>
+    </div>
+  </div>
+
+  <!-- ============ CAPABILITIES ============ -->
+  <section class="block" id="capabilities">
+    <div class="section-head reveal">
+      <div>
+        <div class="num">/01 — CAPABILITIES</div>
+        <h2>Built for the <em>work that matters.</em></h2>
+      </div>
+      <p>Three primitives for every AI workflow — conversational reasoning, grounded retrieval, and on-demand imagery. One unified runtime, no latency tax.</p>
+    </div>
+
+    <div class="cap-grid reveal-stagger">
+
+      <!-- C.01 — AI CHAT -->
+      <article class="cap-card reveal">
+        <div class="cap-card-head">
+          <span class="cap-card-id">C.01</span>
+          <span class="cap-card-dot"></span>
+        </div>
+        <div class="cap-card-graphic">
+          <svg viewBox="0 0 160 90" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stop-color="currentColor" stop-opacity="0"/>
+                <stop offset="0.5" stop-color="currentColor" stop-opacity="1"/>
+                <stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g stroke="currentColor" stroke-width="0.6" opacity="0.25">
+              <circle cx="80" cy="45" r="12"/><circle cx="80" cy="45" r="22"/>
+              <circle cx="80" cy="45" r="32"/><circle cx="80" cy="45" r="42"/>
+            </g>
+            <g class="gr-nodes">
+              <circle cx="38" cy="45" r="2.4" fill="currentColor"/>
+              <circle cx="122" cy="45" r="2.4" fill="currentColor"/>
+              <circle cx="80" cy="13" r="2.4" fill="currentColor"/>
+              <circle cx="80" cy="77" r="2.4" fill="currentColor"/>
+              <circle cx="80" cy="45" r="4" fill="currentColor"/>
+            </g>
+            <path d="M38 45 L80 45 L122 45 M80 13 L80 77" stroke="url(#g1)" stroke-width="1"/>
+          </svg>
+        </div>
+        <h3 class="cap-card-title">AI Chat</h3>
+        <p class="cap-card-body">Conversational reasoning for drafting, summarising, analysing, and brainstorming — across every team, every timezone, every workflow.</p>
+        <div class="cap-card-foot">
+          <span class="cap-key">LATENCY</span>
+          <span class="cap-stat">38ms</span>
+        </div>
+      </article>
+
+      <!-- C.02 — RAG SEARCH -->
+      <article class="cap-card reveal">
+        <div class="cap-card-head">
+          <span class="cap-card-id">C.02</span>
+          <span class="cap-card-dot"></span>
+        </div>
+        <div class="cap-card-graphic">
+          <svg viewBox="0 0 160 90" fill="none" aria-hidden="true">
+            <rect x="20" y="20" width="120" height="50" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
+            <g class="gr-scan">
+              <line x1="20" y1="45" x2="140" y2="45" stroke="currentColor" stroke-width="1"/>
+            </g>
+            <g stroke="currentColor" stroke-width="0.6">
+              <rect x="30" y="30" width="14" height="14" opacity="0.6"/>
+              <rect x="50" y="35" width="22" height="9" opacity="0.4"/>
+              <rect x="80" y="28" width="10" height="18" opacity="0.5"/>
+              <rect x="100" y="32" width="28" height="12" opacity="0.3"/>
+              <rect x="40" y="50" width="50" height="14" opacity="0.25"/>
+              <rect x="95" y="52" width="35" height="10" opacity="0.45"/>
+            </g>
+          </svg>
+        </div>
+        <h3 class="cap-card-title">RAG Search</h3>
+        <p class="cap-card-body">Grounded answers over your knowledge base — policies, wikis, tickets, and reports — with full source citations and zero hallucination risk.</p>
+        <div class="cap-card-foot">
+          <span class="cap-key">RECALL</span>
+          <span class="cap-stat">99.2%</span>
+        </div>
+      </article>
+
+      <!-- C.03 — IMAGE GEN -->
+      <article class="cap-card reveal">
+        <div class="cap-card-head">
+          <span class="cap-card-id">C.03</span>
+          <span class="cap-card-dot"></span>
+        </div>
+        <div class="cap-card-graphic">
+          <svg viewBox="0 0 160 90" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="0.6" opacity="0.5">
+              <rect x="20" y="18" width="44" height="54"/>
+              <rect x="72" y="18" width="44" height="54"/>
+              <rect x="124" y="18" width="22" height="54"/>
+            </g>
+            <g fill="currentColor" opacity="0.85">
+              <circle cx="42" cy="38" r="5"/>
+              <path d="M24 68 L40 52 L52 62 L60 56 L60 72 Z"/>
+              <circle cx="94" cy="38" r="4"/>
+              <path d="M76 68 L88 56 L98 64 L112 50 L112 72 Z"/>
+              <path d="M128 22 L142 22 L142 68 L128 68 Z" opacity="0.35"/>
+            </g>
+            <g stroke="currentColor" stroke-width="0.6" opacity="0.35">
+              <line x1="64" y1="45" x2="72" y2="45"/>
+              <line x1="116" y1="45" x2="124" y2="45"/>
+            </g>
+            <rect class="gr-cursor" x="138" y="22" width="2" height="10" fill="currentColor"/>
+          </svg>
+        </div>
+        <h3 class="cap-card-title">Image Gen</h3>
+        <p class="cap-card-body">On-demand visuals for decks, campaigns, mockups, and social — in your brand style, unlimited iterations, zero licensing friction.</p>
+        <div class="cap-card-foot">
+          <span class="cap-key">RESOLUTION</span>
+          <span class="cap-stat">4K</span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ ARCHITECTURE ============ -->
+  <section class="block" id="architecture">
+    <div class="section-head reveal">
+      <div>
+        <div class="num">/02 — ARCHITECTURE</div>
+        <h2>A runtime <em>without seams.</em></h2>
+      </div>
+      <p>Every layer is purpose-built — from the prompt interface down to the dedicated inference fabric. No middleware bloat, no shared queues.</p>
+    </div>
+
+    <div class="arch-stage reveal">
+      <div class="arch-col">
+        <div class="arch-row">
+          <span class="arch-k">INTERFACE</span>
+          <span class="arch-v">Prompt · Stream · Tool · API</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-k">ORCHESTRATION</span>
+          <span class="arch-v">Router · Planner · Memory</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-k">REASONING CORE</span>
+          <span class="arch-v">Qwen · 512B params</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-k">SUBSTRATE</span>
+          <span class="arch-v">Dedicated inference fabric</span>
+        </div>
+      </div>
+      <div class="arch-diagram">
+        <svg viewBox="0 0 380 380" fill="none" aria-hidden="true">
+          <g stroke="currentColor" stroke-width="0.8" opacity="0.5">
+            <circle cx="190" cy="190" r="170"/>
+            <circle cx="190" cy="190" r="120"/>
+            <circle cx="190" cy="190" r="70"/>
+            <circle cx="190" cy="190" r="28"/>
+          </g>
+          <g class="arch-orbit">
+            <circle cx="190" cy="20" r="5" fill="currentColor"/>
+          </g>
+          <g class="arch-orbit arch-orbit-2">
+            <circle cx="190" cy="70" r="3.5" fill="currentColor"/>
+          </g>
+          <g class="arch-orbit arch-orbit-3">
+            <circle cx="190" cy="120" r="2.5" fill="currentColor"/>
+          </g>
+          <circle cx="190" cy="190" r="8" fill="currentColor"/>
+          <g stroke="currentColor" stroke-width="0.4" opacity="0.18">
+            <line x1="20" y1="190" x2="360" y2="190"/>
+            <line x1="190" y1="20" x2="190" y2="360"/>
+            <line x1="70" y1="70" x2="310" y2="310"/>
+            <line x1="310" y1="70" x2="70" y2="310"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ METRICS ============ -->
+  <section class="block" id="metrics">
+    <div class="section-head reveal">
+      <div>
+        <div class="num">/03 — METRICS</div>
+        <h2>Measured against <em>reality.</em></h2>
+      </div>
+      <p>Live numbers from production. No synthetic benchmarks, no cherry-picked datasets.</p>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric reveal" data-count="38" data-suffix="ms" style="--w:92%">
+        <div class="metric-num">0</div>
+        <div class="metric-label">Median response</div>
+        <div class="metric-bar"><span></span></div>
+      </div>
+      <div class="metric reveal" data-count="99.97" data-suffix="%" style="--w:99%">
+        <div class="metric-num">0</div>
+        <div class="metric-label">Uptime · last 365d</div>
+        <div class="metric-bar"><span></span></div>
+      </div>
+      <div class="metric reveal" data-count="128" data-suffix="K" style="--w:84%">
+        <div class="metric-num">0</div>
+        <div class="metric-label">Context window</div>
+        <div class="metric-bar"><span></span></div>
+      </div>
+      <div class="metric reveal" data-count="2.4" data-suffix="B" style="--w:76%">
+        <div class="metric-num">0</div>
+        <div class="metric-label">Queries · served</div>
+        <div class="metric-bar"><span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MINIGAME ============ -->
+  <section class="block" id="game">
+    <div class="section-head reveal">
+      <div>
+        <div class="num">/04 — MINIGAME</div>
+        <h2>Bot Hunt.<br>Can you catch them all?</h2>
+      </div>
+      <p>A bot randomly appears in the grid. Click it before it vanishes! Speed increases as you score. 30 seconds on the clock.</p>
+    </div>
+
+    <div class="game-wrap reveal">
+      <div class="game-header">
+        <span class="game-title">// BOT_HUNT v1.0</span>
+        <div class="game-stats">
+          <div class="game-stat"><span class="stat-label">Score</span><span class="stat-val" id="scoreVal">0</span></div>
+          <div class="game-stat"><span class="stat-label">Best</span><span class="stat-val" id="hiVal">0</span></div>
+          <div class="game-stat"><span class="stat-label">Time</span><span class="stat-val" id="timerVal">30</span></div>
+        </div>
+      </div>
+      <div class="game-board-wrap">
+        <div id="gameBoard"></div>
+        <div class="game-overlay" id="gameOverlay">
+          <div id="overlayInner">
+            <h3>Hunt the Bot</h3>
+            <p>Click the glowing cell before it moves.<br>Miss = no points. Hit = +1 score.</p>
+            <button class="btn-game" id="startBtn">▶ Start Game</button>
+          </div>
+        </div>
+      </div>
+      <div class="game-footer">
+        <span>Difficulty:</span>
+        <div class="diff-btns">
+          <button class="diff-btn active" data-diff="normal">Normal</button>
+          <button class="diff-btn" data-diff="hard">Hard</button>
+          <button class="diff-btn" data-diff="insane">Insane</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="block" id="contact" style="border-bottom:0; padding-bottom:40px">
+    <div class="offer reveal">
+      <div class="eyebrow">/05 — Get In Touch</div>
+      <h2>Interested in <span class="at">AIBOT.NG</span>?<br>Let's talk.</h2>
+      <p>Drop a message on X or email us directly. We reply within 24 hours.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" id="ctaX" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.522 7.452L22 22h-6.828l-4.79-6.26L4.8 22H2.04l6.978-7.974L2 2h6.914l4.34 5.747L18.244 2Zm-1.196 18h1.5L7.05 4H5.45l11.598 16Z"/></svg>
+          DM @ecko1604 on X
+        </a>
+        <a class="btn btn-secondary" href="mailto:gen@aibot.ng">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          gen@aibot.ng
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT / FOOTER GRID ============ -->
+  <div class="about-wrap reveal">
+    <div class="about-grid">
+      <div class="about-col">
+        <div class="about-brand-title">AIBOT.NG</div>
+        <p class="about-copy">An AI-native platform built for the next generation of chatbots, agents, and automation projects. AI Chat for daily reasoning, RAG for grounded answers, and Image Generation for teams that move fast. Private by design, tuned for your data.</p>
+        <div class="about-stamp">
+          <span class="about-stamp-dot"></span>
+          ACTIVE · 2026
+        </div>
+      </div>
+      <div class="about-col">
+        <div class="about-k">PRODUCT</div>
+        <ul class="about-list">
+          <li><a href="#capabilities">AI Chat</a></li>
+          <li><a href="#capabilities">RAG Search</a></li>
+          <li><a href="#capabilities">Image Gen</a></li>
+          <li><a href="#architecture">Internal API</a></li>
+        </ul>
+      </div>
+      <div class="about-col">
+        <div class="about-k">RESOURCES</div>
+        <ul class="about-list">
+          <li><a href="#">Guidelines</a></li>
+          <li><a href="#">Playbooks</a></li>
+          <li><a href="#">Model Cards</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="about-col">
+        <div class="about-k">CONTACT</div>
+        <ul class="about-list">
+          <li><a href="mailto:gen@aibot.ng">gen@aibot.ng</a></li>
+          <li><a href="https://x.com/ecko1604" target="_blank" rel="noopener">@ecko1604 on X</a></li>
+          <li><span>Support · Mon–Fri</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <footer>
+      <div>© 2026 AIBOT.NG · All rights reserved</div>
+      <div>
+        <a href="mailto:gen@aibot.ng">gen@aibot.ng</a>
+        <span style="margin:0 8px;opacity:0.4">·</span>
+        Last updated: <span id="lastUpdate">—</span>
+      </div>
+    </footer>
+  </div>
+
+</main>
+
+<script>
+  // ===== Wire links =====
+  ['navX','ctaX'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.href = LINKS.x;
+  });
+
+  // ===== Apply tweaks =====
+  (function applyTweaks(t) {
+    document.body.setAttribute('data-theme', t.theme);
+    document.documentElement.style.setProperty('--accent', t.accent);
+    const hex = t.accent.replace('#','');
+    const r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+    const lum = (0.299*r+0.587*g+0.114*b)/255;
+    document.documentElement.style.setProperty('--accent-ink', lum>0.6?'#001b0c':'#ffffff');
+    const grid=document.getElementById('bgGrid'), glow=document.getElementById('bgGlow');
+    if (grid) grid.style.display=(t.bg==='grid'||t.bg==='both')?'block':'none';
+    if (glow) glow.style.display=(t.bg==='glow'||t.bg==='both'||t.bg==='grid')?'block':'none';
+    const rb=document.getElementById('robotBox');
+    if (rb) rb.style.display=t.showRobot?'block':'none';
+  })(TWEAK_DEFAULTS);
+
+  // ===== Last updated =====
+  document.getElementById('lastUpdate').textContent =
+    new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
+
+  // ===== Network BG =====
+  (function netBG() {
+    const canvas=document.getElementById('netCanvas'), ctx=canvas.getContext('2d');
+    let W=0,H=0,dpr=Math.min(window.devicePixelRatio||1,2),nodes=[];
+    const mouse={x:-9999,y:-9999,active:false};
+    function resize(){
+      W=canvas.clientWidth; H=canvas.clientHeight;
+      canvas.width=W*dpr; canvas.height=H*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const t=Math.max(40,Math.min(110,Math.floor((W*H)/18000)));
+      while(nodes.length<t) nodes.push(mkNode());
+      while(nodes.length>t) nodes.pop();
+    }
+    function mkNode(){ return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.35,vy:(Math.random()-0.5)*0.35,r:1.2+Math.random()*1.6}; }
+    function rgb(){
+      const cs=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      const h=cs.replace('#','');
+      if(h.length<6) return[255,123,154];
+      return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];
+    }
+    function light(){ return document.body.getAttribute('data-theme')==='light'; }
+    function step(){
+      ctx.clearRect(0,0,W,H);
+      const [ar,ag,ab]=rgb(), lt=light(), lb=lt?[10,12,16]:[255,255,255];
+      for(const n of nodes){
+        n.x+=n.vx; n.y+=n.vy;
+        if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1;
+        if(mouse.active){const dx=mouse.x-n.x,dy=mouse.y-n.y,d2=dx*dx+dy*dy;if(d2<22500){n.vx+=dx*0.0008;n.vy+=dy*0.0008;}}
+        n.vx=Math.max(-0.7,Math.min(0.7,n.vx*0.995)); n.vy=Math.max(-0.7,Math.min(0.7,n.vy*0.995));
+      }
+      const MAX=140;
+      for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+        if(d<MAX){
+          const al=(1-d/MAX)*(lt?0.35:0.45);
+          const mid=((a.x+b.x)/2-mouse.x)**2+((a.y+b.y)/2-mouse.y)**2;
+          const near=mouse.active&&mid<14400;
+          ctx.strokeStyle=near?`rgba(${ar},${ag},${ab},${al+0.15})`:`rgba(${lb[0]},${lb[1]},${lb[2]},${al*0.55})`;
+          ctx.lineWidth=near?0.9:0.6;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        }
+      }
+      for(const n of nodes){
+        const dm=mouse.active?Math.hypot(n.x-mouse.x,n.y-mouse.y):9999;
+        ctx.fillStyle=dm<120?`rgba(${ar},${ag},${ab},0.95)`:`rgba(${ar},${ag},${ab},0.55)`;
+        ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();
+      }
+      requestAnimationFrame(step);
+    }
+    window.addEventListener('resize',resize);
+    window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;mouse.active=true;});
+    window.addEventListener('mouseleave',()=>{mouse.active=false;});
+    resize(); step();
+  })();
+
+  // ===== Scroll reveal + metric count-up =====
+  (function reveals() {
+    function startCount(el){
+      const numEl=el.querySelector('.metric-num');
+      if(!numEl||el.classList.contains('counted')) return;
+      el.classList.add('counted');
+      const target=parseFloat(el.dataset.count), suffix=el.dataset.suffix||'';
+      const isInt=Number.isInteger(target), dur=1400, start=performance.now();
+      function tick(now){
+        const t=Math.min(1,(now-start)/dur), eased=1-Math.pow(1-t,3), val=target*eased;
+        numEl.innerHTML=(isInt?Math.round(val).toLocaleString():val.toFixed(2))+`<span class="unit">${suffix}</span>`;
+        if(t<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const io=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add('in');
+          if(e.target.classList.contains('metric')) startCount(e.target);
+          io.unobserve(e.target);
+        }
+      });
+    },{threshold:0.15,rootMargin:'0px 0px -40px 0px'});
+    document.querySelectorAll('.reveal,.reveal-stagger').forEach(el=>io.observe(el));
+  })();
+
+  // ===== Pointer glow on capability cards =====
+  document.querySelectorAll('.cap-card').forEach(card=>{
+    card.addEventListener('pointermove',e=>{
+      const r=card.getBoundingClientRect();
+      card.style.setProperty('--mx',`${e.clientX-r.left}px`);
+      card.style.setProperty('--my',`${e.clientY-r.top}px`);
+    });
+  });
+
+  // ===== Edit mode (Tweaks) =====
+  (function tweaks(){
+    let active=false,panel=null;
+    const ACCENTS=['#FF7B9A','#7CFFB2','#7BB8FF','#FFB347','#A78BFA'];
+    function persist(edits){window.parent.postMessage({type:'__edit_mode_set_keys',edits},'*');}
+    function buildPanel(){
+      const p=document.createElement('div');
+      p.style.cssText=`position:fixed;right:20px;bottom:20px;z-index:9999;background:var(--bg-2);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:18px;width:260px;font-family:var(--sans);font-size:13px;box-shadow:0 20px 60px -20px rgba(0,0,0,0.4);`;
+      p.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><strong style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;">Tweaks</strong><button id="tx" style="background:none;border:0;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0;">×</button></div><div style="margin-bottom:14px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Theme</div><div id="tTheme" style="display:flex;gap:4px;background:var(--card);padding:3px;border-radius:100px;border:1px solid var(--line);"><button data-v="light" style="flex:1;padding:6px;border-radius:100px;border:0;background:transparent;color:var(--fg);cursor:pointer;font-size:12px;">Light</button><button data-v="dark" style="flex:1;padding:6px;border-radius:100px;border:0;background:transparent;color:var(--fg);cursor:pointer;font-size:12px;">Dark</button></div></div><div style="margin-bottom:14px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Accent</div><div id="tAccent" style="display:flex;gap:6px;">${ACCENTS.map(c=>`<button data-v="${c}" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:${c};cursor:pointer;padding:0;"></button>`).join('')}</div></div><div style="margin-bottom:6px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Background</div><div id="tBg" style="display:flex;gap:4px;background:var(--card);padding:3px;border-radius:100px;border:1px solid var(--line);"><button data-v="grid" style="flex:1;padding:6px;border-radius:100px;border:0;background:transparent;color:var(--fg);cursor:pointer;font-size:11px;">Grid</button><button data-v="glow" style="flex:1;padding:6px;border-radius:100px;border:0;background:transparent;color:var(--fg);cursor:pointer;font-size:11px;">Glow</button><button data-v="minimal" style="flex:1;padding:6px;border-radius:100px;border:0;background:transparent;color:var(--fg);cursor:pointer;font-size:11px;">Min</button></div></div>`;
+      document.body.appendChild(p);
+      const sync=()=>{
+        const cur=TWEAK_DEFAULTS;
+        p.querySelectorAll('#tTheme button').forEach(b=>{b.style.background=b.dataset.v===cur.theme?'var(--accent)':'transparent';b.style.color=b.dataset.v===cur.theme?'var(--accent-ink)':'var(--fg)';});
+        p.querySelectorAll('#tAccent button').forEach(b=>{b.style.borderColor=b.dataset.v===cur.accent?'var(--fg)':'var(--line)';});
+        p.querySelectorAll('#tBg button').forEach(b=>{b.style.background=b.dataset.v===cur.bg?'var(--accent)':'transparent';b.style.color=b.dataset.v===cur.bg?'var(--accent-ink)':'var(--fg)';});
+      };
+      p.querySelector('#tx').onclick=()=>{window.parent.postMessage({type:'__edit_mode_dismissed'},'*');close();};
+      p.querySelectorAll('#tTheme button').forEach(b=>{b.onclick=()=>{TWEAK_DEFAULTS.theme=b.dataset.v;document.body.setAttribute('data-theme',b.dataset.v);persist({theme:b.dataset.v});sync();};});
+      p.querySelectorAll('#tAccent button').forEach(b=>{b.onclick=()=>{TWEAK_DEFAULTS.accent=b.dataset.v;document.documentElement.style.setProperty('--accent',b.dataset.v);const h=b.dataset.v.replace('#','');const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),bb=parseInt(h.substr(4,2),16);const lum=(0.299*r+0.587*g+0.114*bb)/255;document.documentElement.style.setProperty('--accent-ink',lum>0.6?'#001b0c':'#ffffff');persist({accent:b.dataset.v});sync();};});
+      p.querySelectorAll('#tBg button').forEach(b=>{b.onclick=()=>{TWEAK_DEFAULTS.bg=b.dataset.v;const grid=document.getElementById('bgGrid');const glow=document.getElementById('bgGlow');if(grid)grid.style.display=(b.dataset.v==='grid')?'block':'none';if(glow)glow.style.display=(b.dataset.v==='glow'||b.dataset.v==='grid')?'block':'none';persist({bg:b.dataset.v});sync();};});
+      sync(); return p;
+    }
+    function open(){if(!panel)panel=buildPanel();panel.style.display='block';active=true;}
+    function close(){if(panel)panel.style.display='none';active=false;}
+    window.addEventListener('message',e=>{if(!e.data||typeof e.data!=='object')return;if(e.data.type==='__activate_edit_mode')open();else if(e.data.type==='__deactivate_edit_mode')close();});
+    window.parent.postMessage({type:'__edit_mode_available'},'*');
+  })();
+
+  // ===== BOT HUNT MINIGAME =====
+  (function botHunt(){
+    const COLS=6,ROWS=3,TOTAL=COLS*ROWS,DURATION=30;
+    const DIFF={normal:{baseInterval:1400,minInterval:600,step:30},hard:{baseInterval:1000,minInterval:400,step:40},insane:{baseInterval:700,minInterval:250,step:50}};
+    let score=0,hiScore=parseInt(localStorage.getItem('aibot_hi')||'0',10);
+    let timeLeft=DURATION,activeCellIdx=-1,gameTimer=null,botTimer=null;
+    let interval=DIFF.normal.baseInterval,diff='normal',running=false;
+    const board=document.getElementById('gameBoard'),overlay=document.getElementById('gameOverlay'),
+          inner=document.getElementById('overlayInner'),scoreVal=document.getElementById('scoreVal'),
+          hiVal=document.getElementById('hiVal'),timerEl=document.getElementById('timerVal'),
+          startBtn=document.getElementById('startBtn');
+    hiVal.textContent=hiScore;
+    for(let i=0;i<TOTAL;i++){
+      const c=document.createElement('div'); c.className='cell'; c.dataset.idx=i;
+      c.addEventListener('click',()=>onCellClick(i)); board.appendChild(c);
+    }
+    function cells(){return board.querySelectorAll('.cell');}
+    function clearActive(){cells().forEach(c=>c.classList.remove('bot-active'));activeCellIdx=-1;}
+    function spawnBot(){
+      clearActive();
+      let idx; do{idx=Math.floor(Math.random()*TOTAL);}while(idx===activeCellIdx);
+      activeCellIdx=idx; cells()[idx].classList.add('bot-active');
+    }
+    function onCellClick(idx){
+      if(!running)return;
+      if(idx===activeCellIdx){
+        const cfg=DIFF[diff]; score++; scoreVal.textContent=score;
+        cells()[idx].classList.remove('bot-active'); cells()[idx].classList.add('hit');
+        setTimeout(()=>cells()[idx]&&cells()[idx].classList.remove('hit'),200);
+        activeCellIdx=-1;
+        interval=Math.max(cfg.minInterval,interval-cfg.step);
+        clearTimeout(botTimer); botTimer=setTimeout(spawnBot,interval);
+      } else if(activeCellIdx!==-1){
+        cells()[idx].classList.add('miss');
+        setTimeout(()=>cells()[idx]&&cells()[idx].classList.remove('miss'),300);
+      }
+    }
+    function startGame(){
+      score=0; timeLeft=DURATION; scoreVal.textContent='0';
+      timerEl.textContent=DURATION; timerEl.classList.remove('urgent');
+      interval=DIFF[diff].baseInterval; running=true; overlay.style.display='none';
+      clearInterval(gameTimer); clearTimeout(botTimer);
+      gameTimer=setInterval(()=>{
+        timeLeft--; timerEl.textContent=timeLeft;
+        if(timeLeft<=5)timerEl.classList.add('urgent');
+        if(timeLeft<=0)endGame();
+      },1000);
+      botTimer=setTimeout(spawnBot,interval);
+    }
+    function endGame(){
+      running=false; clearInterval(gameTimer); clearTimeout(botTimer);
+      clearActive(); timerEl.classList.remove('urgent');
+      if(score>hiScore){hiScore=score;localStorage.setItem('aibot_hi',hiScore);hiVal.textContent=hiScore;}
+      const isNew=score>=hiScore;
+      inner.innerHTML=`
+        <h3>${isNew&&score>0?'🏆 New Best!':'Game Over'}</h3>
+        <div class="score-big">${score}</div>
+        <div class="score-hi">Best: <b>${hiScore}</b></div>
+        <p style="margin-top:8px;">${score===0?"Zero bots caught. The bots won.":score<5?"The bots are laughing at you.":score<12?"Decent reflexes, human.":score<20?"Fast fingers! Nice.":"You are literally superhuman. 🤖"}</p>
+        <button class="btn-game" id="startBtn">▶ Play Again</button>`;
+      overlay.style.display='flex';
+      document.getElementById('startBtn').addEventListener('click',startGame);
+    }
+    startBtn.addEventListener('click',startGame);
+    document.querySelectorAll('.diff-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(running)return; diff=btn.dataset.diff;
+        document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
